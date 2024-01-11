@@ -9,6 +9,7 @@ public class FollowWP : MonoBehaviour
     public float rotSpeed = 10.0f;
     public float speed = 10.0f;
     GameObject tracker;
+    public float lookAhead = 10.0f;
     // Start is called before the first frame update
     void Start()
     {
@@ -16,10 +17,15 @@ public class FollowWP : MonoBehaviour
         DestroyImmediate(tracker.GetComponent<Collider>());
         tracker.transform.position = this.transform.position;
         tracker.transform.rotation = this.transform.rotation;
+        //tracker.GetComponent<MeshRenderer>().enabled = false;
     }
     void ProgressTracker()
     {
-        if (Vector3.Distance(this.transform.position, waypoints[currentWp].transform.position) < 3)
+        if (Vector3.Distance(tracker.transform.position, this.transform.position) > lookAhead)
+        { 
+            return; 
+        }
+        if (Vector3.Distance(tracker.transform.position, waypoints[currentWp].transform.position) < 3)
         {
             currentWp++;
         }
@@ -27,8 +33,9 @@ public class FollowWP : MonoBehaviour
         {
             currentWp = 0;
         }
+
         tracker.transform.LookAt(waypoints[currentWp].transform.position);
-        tracker.transform.Translate(0, 0, 0.1f);
+        tracker.transform.Translate(0, 0, (speed + 20) * Time.deltaTime);
     }
     // Update is called once per frame
     void Update()
@@ -36,8 +43,8 @@ public class FollowWP : MonoBehaviour
         ProgressTracker();
         //this.transform.LookAt(waypoints[currentWp].transform);
         
-        //Quaternion lookatWP = Quaternion.LookRotation(waypoints[currentWp].transform.position - this.transform.position);
-        //this.transform.rotation = Quaternion.Slerp(this.transform.rotation, lookatWP, rotSpeed * Time.deltaTime);
-        //this.transform.Translate(0,0,speed * Time.deltaTime);
+        Quaternion lookatWP = Quaternion.LookRotation(tracker.transform.position - this.transform.position);
+        this.transform.rotation = Quaternion.Slerp(this.transform.rotation, lookatWP, rotSpeed * Time.deltaTime);
+        this.transform.Translate(0,0,speed * Time.deltaTime);
     }
 }
